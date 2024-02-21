@@ -1,5 +1,6 @@
 import socket
 import threading
+from loguru import logger
 
 class LoadTest:
     """
@@ -52,22 +53,22 @@ class LoadTest:
                 s.sendall(message.encode())
                 response = s.recv(1024)
                 decoded_response = response.decode()
-                print(f"Received response: {decoded_response}")
+                logger.info(f"Received response: {decoded_response}")
                 if "positive" in decoded_response.lower():  # Puedes ajustar la lógica según la respuesta del servidor
                     with self.lock:
                         self.successful_responses += 1
         except Exception as e:
-            print(f"Error: {e}")
+            logger.error(f"Error: {e}")
         finally:
             with self.lock:
                 self.completed_requests += 1
                 if self.completed_requests >= num_clients:
                     self.event.set()
-                    print(f"Completed requests: {self.completed_requests}")
+                    logger.info(f"Completed requests: {self.completed_requests}")
 
     def wait_for_completion(self):
         """
         Wait for all clients to complete their requests and signal thread completion.
         """
         self.event.wait()
-        print(f"Successful responses: {self.successful_responses}")
+        logger.info(f"Successful responses: {self.successful_responses}")
